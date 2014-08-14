@@ -1,0 +1,325 @@
+﻿<Intro>
+Welcome to the program GeneticPictureMaker
+
+This program will process an image using a genetic algorithm to produce a new image it has many parameters and was originally written as a teaching tool, for the subject Soft Computing at the University of Canberra.
+
+The idea was to create a program so students studying genetic algorithms would be able to do experiments varying, number of generations, selection methods, problem complexity and mutation methods. As a by-product students in the subject Game Programming could process images to obtain, derived royalty free images.
+
+Be aware that copyright law is different from country to country, and a very close copy of an image even if re-processed by this program would still in some cases be a 'derived work' and subject to copyright. however the highy stylised examples I supply are examples of images that at least in Australia would not be subject to copyright because they are very different from the originals (see image example1.png) for an example of just how different the derived work is. It is a new image quite different from the original image.
+</Intro>
+
+<HelpRndSeed>
+Random Seed 
+When the Run button is pressed the global random number generator is re-seeded to this number. It is used so we can get reproducible runs (and reproducible errors when debugging) you should change it between runs.
+The dice button creates a new random seed based on the time.
+</HelpRndSeed>
+
+<HelpGenomeSize>
+Size Of Genome
+This is the number of genes on the genome. Each gene is one drawing element in the program so a picture with 5 genes drawn as ovals will have 5 ovals. 
+</HelpGenomeSize>
+
+<HelpGenerations>
+Generations
+This is the number of generations that the Genetic Algorithm will run for. It can be set unreasonably high (eg 1000000) and once a visually satisfying solution is found the stop button is pressed.
+You need to think about this if you are doing multiple runs for it is how the program knows to end a run.
+</HelpGenerations>
+
+<HelpPopulation>
+Population
+This is the size of the population that breed during the Genetic Algorithm.
+As a general rule population counts less than 50 are not useful due to lack of genetic diversity. Fitness, duplicate gene and duplicate score comparisons, require all members of the population to be compared with each other so large populations are disproportionately slower than small ones. 
+</HelpPopulation>
+
+<HelpSize>
+SizeX and SizeY
+This is the size of the template image its loaded from the template image itself and cannot be changed unless the template is resized (I suggest the free program paint.net to resize the templates, but any image editor will work)
+</HelpSize>
+
+<HelpSampleGap>
+Sample Gap X, Sample Gap Y
+This is the gap between test pixels during the run its used to speed up the run. In order to get the highest fidelity image vales of 1 and 1 should be used.
+As a general rule these values should both be less than Minimum drawing size otherwise a given drawing element may not be evaluated.
+1,1 = tests every pixel (slow)
+2,2 = tests every fourth pixel (quicker but less accurate)
+3,3 = tests every ninth pixel (quick)
+5,5 = tests every 25th pixel
+6,6 or more - probably pointless unless the original image is very odd, or a somewhat strange effect is desired.
+In theory one could have a non-symmetric test such as values of 1,5 which would test every 5th line
+</HelpSampleGap>
+
+<HelpSelection>
+Selection 
+This is how old images are removed and new ones created from the remainder the values are:
+
+Kill10% = kills the weakest 10% of the population each generation
+Kill20% = kills the weakest 20% of the population each generation
+Kill30% = as above for 30%
+Kill40% = as above for 40%
+Kill50% = as above for 50%
+Kill60% = as above for 60%
+Kill70% = as above for 70%
+Kill80% = as above for 80%
+Kill90% = as above for 90%
+Kill100% = as above for 100% see NOTE3
+Kill50%&80E20 = kills 50% of the population most generations then every 20 generations it kills 80%
+Kill50%&90%E100 = kills 50% of the population most generations then every 100 generations it kills 90%
+Tournament = two random individuals are chosen the 'weaker' is automatically killed repeated till half the population is dead
+Tournament75 = two random individuals are chosen the 'weaker' is killed 75% of the time repeated till half the population is dead
+
+NOTE1: only the Tournament75 and the Kill100% options does not implement elitism.
+NOTE2: be sure to have at least 10 individuals in the population for any 90% kill selections and to have at least 5 individuals in the population for any 80% kill selections ect.
+NOTE3: Killing 100% will still have evolution happening because it starts at the worst and breeds from the remainder (e.g. in a population of 100 as it kills the worst one 99  better ones still exist to breed from)
+NOTE4: Breeding does not happen from newly born individuals
+NOTE5: When a genome attempts to breed with itself a temporary random genome is created to breed with, this reduces Elitism in kill 100%
+</HelpSelection>
+
+<HelpRuns>
+Runs
+This is the number of runs in this larger run of the program, usually it is set to one, however if many processed versions of an image are desired
+</HelpRuns>
+
+<HelpMethod>
+Distance
+The distance measure is the pixel by pixel comparison that feeds the Fitness function for the genetic algorithm. the fitness function is the sum of the distance measures of all the pixels in the image that are being tested. If the Sample gap fields are 1 and 1 then every pixel is being tested and added to the sum, for fitness function purposes (se also the Sample Gap X and Y fields). 
+This is the way we measure similarity between the images when comparing individual pixels the possible values are:
+FastManhattan, Manhattan, Euclidian, MAXMan, Grey, NearEnough
+
+colour values are between 0 and 255 for each of the three colour values of Red (R) Green (G) and Blue (B). In the formulae below c1 is the source image pixel colour and c2 is the colour of the image generated from the genome in the population. 
+
+   FastManhattan : Math.Abs(c1.R - c2.R) + Math.Abs(c1.G - c2.G) + Math.Abs(c1.B - c2.B);
+   Which is A fast implementaion of manhattan distance in the 3 dimensional colour space, this is the fastest method due to no weighting, square roots or special conditions.
+   
+   Manhattan is : Math.Abs(c1.R - c2.R)*WeightRed + Math.Abs(c1.G - c2.G)*WeightGreen + Math.Abs(c1.B - c2.B)*WeightBlue;
+   Which is the colour weighted manhattan distance in the 3 dimensional colour space
+
+   Euclidian is : Math.Sqrt(((c1.R - c2.R) * (c1.R - c2.R))*WeightRed + ((c1.G - c2.G) * (c1.G - c2.G))*WeightGreen + ((c1.B - c2.B) * (c1.B - c2.B))*WeightBlue);
+   Which is the colour weighted Euclidian distance in the 3 dimensional colour space
+   
+   MAXMan : Math.Max(Math.Abs(c1.R - c2.R)*WeightRed, Math.Max(Math.Abs(c1.G - c2.G)*WeightGreen, Math.Abs(c1.B - c2.B)*WeightBlue));
+   Which is the maximum of the 3 individual colour weighted manhattan values
+   
+   Grey : Math.Abs((c1.R*WeightRed + c1.G*WeightGreen + c1.B*WeightBlue)-(c2.R*WeightRed + c2.G*WeightGreen + c2.B*WeightBlue));
+   Which compares total intensity weighted for each colour (in effect its a comparison of grey values)
+
+   NearEnough : This is a weighted manhattan distance but for each colour value if its less than a threshold the values is treated as equality
+			the algorithm is shown below  
+            rr = Math.Abs(c1.R - c2.R)*WeightRed;
+            gg = Math.Abs(c1.G - c2.G)*WeightGreen;
+            bb = Math.Abs(c1.B - c2.B)*WeightBlue;
+            if (rr < nearEnoughRange) rr = 0;
+            if (gg < nearEnoughRange) gg = 0;
+            if (bb < nearEnoughRange) bb = 0;
+            return rr + gg + bb;
+			NOTE1 - The threshold is set by the field NE Range.
+			NOTE2 - With this distance formulea and a high 'Near Enough Range' (NE Range) value you can get *perfect* answers with a score of 0. 
+   
+</HelpMethod>
+
+<HelpColour>
+Colour Weights
+These fields are a factors that a colour value is multiplied by during the distance evaluation process see 'Distance'.
+These values are shown in the Distance formulae as WeightRed, WeightGreen and WeightBlue
+Typically they are between 0 and 2
+Common values
+0 : - removes the colour (makes this colour unimportant, for fitness function evaluation)
+1 : - the common sane value
+2 : - applies a weighting of 2 (if the other colours are a 1 then this colour will affect the fitness function twice as much as the other two colour values)
+</HelpColour>
+
+<HelpNearEnoughRange>
+NE Range
+This field is used only when the distance measure is Near Enough. It is the tolerance used in the formulae shown in distance it is the value nearEnoughRange.
+Typically it will be 0 to require a perfect match (the two colours exactly the same) or a low value of 1  to 10 to get colours that are very close to match as perfect.
+</HelpNearEnoughRange>
+
+<second column>
+</second column>
+
+<HelpDraw>
+Draw (two combo boxes)
+This defines the drawing element used possible values are:
+Oval, Circle, Rectangle, BrushList, BrushReSize, Square
+Oval = multi-coloured ovals
+Circle = multi-coloured circles
+Rectangle = multi-coloured Rectangles
+BrushList = a list of images loaded from the directory in the second combo box displayed without changing size
+BrushReSize = a list of images loaded from the directory in the second combo box displayed in various sizes
+Square = multi-coloured Squares
+the second combobox will show BrushesA, BrushesB, BrushesC or BrushesD this is simply the directory that the brush images are loaded from
+</HelpDraw>
+
+<HelpBrushes>
+Brushes Combobox
+This is simply the sub directory in which the brush images are stored. Brush images must follow the naming convention Brush0.png through to Brush99.png the programs assumes that there is a continuous sequence from 0 to maximum brush and stops looking once a file is not found.
+this field is only used if a brush draw type is selected either BrushList or BrushReSize
+</HelpBrushes>
+
+<HelpDrawSize>
+Max Size, Min Size
+These fields control the maximum and minimum sizes of the drawing elements. The field is ignored if BrushList is selected in Draw 
+</HelpDrawSize>
+
+<HelpBackgroundColour>
+Colour 
+This is the background colour you want for the image.
+The other button is simply a quick way of setting the background colour from the top left pixel of the source image.
+This colour is also used to select which pixels will be transparent in the final processed image.
+</HelpBackgroundColour>
+
+<HelpTransparency>
+Transparency checkbox and Transparency tollerance
+If the Transparency checkbox is checked then the program will process the image prior to saving so that the background colour is replaced by a transparent black. the effect of this is that it makes the image background transparent and therefore suitable for use in a computer game, or for Photoshop etc.
+The transparency tolerance controls how accurately the background colour is matched 0 means it must exactly match a higher value (usually 10 to 15) gives a more coarse match, allowing drawing elements near the background colour to be replaced with transparency.
+Technically the transparency tolerance is the Manhattan distance in colour space to match the background colour.
+HINT: If colour weights are 1 and the distance measure is Near enough, then this value can be set to the same value as Near Enough, to make all draw elements near enough to the background colour to become transparent.
+HINT2: While this feature was added specifically for the distance measure Near enough I have found it useful to set it to a low value for any transparency run, 5 to 15 seems to work well.    
+</HelpTransparency>
+
+<HelpSaveEachGen>
+Save each gen checkbox
+This checkbox and the subsequent fields allow the program to save the best individual from each generation in a directory. These can later be used in a variety of ways but the main use is ti stitch the images together to form a movie for you tube or an animated gif.
+While one can save every gen by setting the first counter to a very high value, its usually better to get each generation for some time, then skip a few generations, then after a while skip even more generations, so the system follows a statement like 
+"Save each generation until generation 100 then save each 10th generation until generation 1000 then save each 100th generation thereafter" one can of course change the numbers in the sentence.
+I have found "Save each generation until generation 300 then save each 10th generation until generation 2000 then save each 100th generation thereafter" to be a good starting point, but the numbers are a bit high for default values so some experimentation is necessary.
+</HelpSaveEachGen>
+
+<HelpFilePrefix>
+File prefix combobox and the gen button
+This combobox (which you can type directly in to if you want) allows setting of a file prefix on the save system. The gen button generates a prefix based on the date and time of run of the format DYYYYMMDD_HHMM (eg D20140115_0949).  
+</HelpFilePrefix>
+
+<HelpPlayback>
+Playback
+This plays back a previously recorded set of images; note that the prefix and "Save each generation until generation 100 then save each 10th generation until generation 1000 then save each 100th generation thereafter" values must be exactly the same as when the image was recorded. Its really designed for a review after a run, and not for review after the program ends.
+</HelpPlayback>
+
+<HelpSavePic>
+Save Pic now button and auto save on stop checkbox
+These are fairly self-evident allowing a single snapshot of the best image at any time; and a feature to enable or disable a snapshot to be taken if the stop button is pressed.
+</HelpSavePic>
+
+<HelpSaveDirectories>
+Select Save Directories
+This displays a new form that permits setting of the 3 directories that the program can record images into.
+</HelpSaveDirectories>
+
+<HelpShowAllGenomes>
+Show all genomes checkbox
+This is a checkbox causing all of the population to be displayed as its evaluated. it can be switched freely during the run when it is not checked only the best individual in the generation is shown.
+HINT : It really slows the program, so I mainly leave it off.
+</HelpShowAllGenomes>
+
+<HelpMutationCase1>
+Mutation case 1
+The value in this field is the percentage chance of a mutation being a type 1 mutation
+A type 1 mutation is a mutation affecting random (1 to dnaSize) genes replacing the gene with a new random gene
+type 1 mutations are coarse mutations , making generally large changes to the genome these tend to be helpful in the early stages of evolution , but tend to be less useful later in the run.
+The associated counter advises how often this mutation is used during the run.
+NOTE1: the chance of a mutation is set by a different field specifically Mutation rate percent so this field is the chance of this mutation after it has been decided there will be a mutation.
+NOTE2: the sum of all of the Mutation cases must be 100 representing 100% chance of a mutation.
+NOTE3: the counter beside this field is a count of the number of mutation applied, it is not a count of the number of mutations currently in the gene pool, because many mutations immediately die out and are lost.
+</HelpMutationCase1>
+
+<HelpMutationCase2>
+Mutation case 2
+The value in this field is the percentage chance of a mutation being a type 2 mutation
+A type 2 mutation is a mutation that modifies 1 to 4 genes (with a probabilistic bias towards 1) by +/- the CreepValue 
+creep value is set by the field 'Mutation size' and is typically 80
+Type 2 mutation are mutations that represent a smaller change, tending to make small improvements (or small declines in fitness) rather than big ones.
+The associated counter advises how often this mutation is used during the run.
+NOTE1: A gene has more than one value so within the gene one value is chosen randomly.
+NOTE2: the chance of a mutation is set by a different field specifically Mutation rate percent so this field is the chance of this mutation after it has been decided there will be a mutation.
+NOTE3: the sum of all of the Mutation cases must be 100 representing 100% chance of a mutation.
+NOTE4: the counter beside this field is a count of the number of mutation applied, it is not a count of the number of mutations currently in the gene pool, because many mutations immediately die out and are lost.
+</HelpMutationCase2>
+
+<HelpMutationCase3>
+Mutation case 3
+The value in this field is the percentage chance of a mutation being a type 3 mutation
+A type 3 mutation is a mutation that swaps the draw order of two random genes  
+The associated counter advises how often this mutation is used during the run.
+NOTE1: the chance of a mutation is set by a different field specifically Mutation rate percent so this field is the chance of this mutation after it has been decided there will be a mutation.
+NOTE2: the sum of all of the Mutation cases must be 100 representing 100% chance of a mutation.
+NOTE3: the counter beside this field is a count of the number of mutation applied, it is not a count of the number of mutations currently in the gene pool, because many mutations immediately die out and are lost.
+</HelpMutationCase3>
+
+<HelpMutationCase4>
+Mutation case 4
+The value in this field is the percentage chance of a mutation being a type 4 mutation
+A type 4 mutation is a mutation that selects a random gene and copies it, applies a mutation (+/- creepval) to up to 4 values in the gene (biased low towards 1) then replaces a random gene with the new copy.
+The associated counter advises how often this mutation is used during the run.
+NOTE1: the chance of a mutation is set by a different field specifically Mutation rate percent so this field is the chance of this mutation after it has been decided there will be a mutation.
+NOTE2: the sum of all of the Mutation cases must be 100 representing 100% chance of a mutation.
+NOTE3: the counter beside this field is a count of the number of mutation applied, it is not a count of the number of mutations currently in the gene pool, because many mutations immediately die out and are lost.
+</HelpMutationCase4>
+
+<HelpDuplicateGene>
+Duplicate Gene Checkbox
+After any mutation the possibility exists that this gene is already in the individual somewhere, checking this box causes any cases of duplicate genes to have one of the duplicates changed, it, applies a mutation (+/- creepval) to up to 4 values in the gene (biased low towards 1) 
+the associated counter advises how often this process is needed during the run.
+</HelpDuplicateGene>
+
+<HelpDuplicateGenomes>
+Duplicate Genomes Checkbox
+If checked this box ensures that for every breeding/mutation there are no duplicate genomes in the gene pool (population). This is a legacy feature usually not used because genomes that are not identical can still have the same drawn image and score. It’s also slow because it checks each genome with each other genome in the population every generation. If a duplicate is found when this is checked it, applies a mutation (+/- creepval) to up to 4 values in the gene (biased low towards 1) 
+</HelpDuplicateGenomes>
+
+<HelpDuplicateScore>
+Duplicate Score combobox
+If this feature is selected then checkbox is checked then each selected generation a check is done for genomes with the same score.
+This is a fairly slow process because it compares each individual in the population with all others in the population.
+If duplicates score genomes are found then one is mutated calling the standard mutate so it could be a type 1,2,3 or 4 mutation as per the Mutation case percentages.
+The associated counter tells how often duplicate scores are found.
+HINT1: This is a good idea unless you have a very large population and want the GA to search (at a run time cost) more paths forward from one genome.
+HINT2: I usually set this to every 5th or every 10th generation to reduce the run time cost but keep good genetic diversity in my gene pool   
+</HelpDuplicateScore>
+
+<HelpSumMutation>
+Sum Mut 1 to 4
+This is a simple display field that tells how many times mutations are run; i guess its not really needed, but I find it helpful when experimenting with mutation rates.
+</HelpSumMutation>
+
+<HelpMutationRate>
+Mutation Rate
+This is the mutation rate for the normal breeding process. 
+Note that additional mutations will be 'created' if the duplicate gene, duplicate genome or duplicate score processing is selected.
+I set it to typically 3% to 5%
+If set to high the mutations can dominate the gene pool and evoloution can be very slow, the fact that elitism is implemented in most selection processes tends to save the system.
+Many people advocate high mutation values, but its fairly easy to set it to high (or high enough to slow down evolution); 
+EXPERIMENT: As an experiment to see this value being to high, you need to set it to about 55% and then use the selection method Tournament75, and see how evolution goes. reduce the mutation rate to 25% see if that helps at all. 
+</HelpMutationRate>
+
+<HelpMutationSize>
+Mutation Size
+This is simply the size of CreepVal when mutations occur, a lower value means things will mutate slowly and creep towards a solution, a higher value suggests that things will move faster, but there is a higher chance late in the run of a less beneficial mutation.
+The default value of 80 is a sane start point, values less than 10 (or even 20 for smaller images) may cause large numbers of duplicate score events.  
+</HelpMutationSize>
+
+<HelpLoopy>
+Loopy (number) combobox
+This is the number of re seeds in the random number box that will be processed automatically
+is this used
+</HelpLoopy>
+
+<HelpMasterDir>
+Master Directory
+Selecting a master directory will automatically select Stop, Gen, Loop as sub directories
+</HelpMasterDir>
+
+<HelpStopDir>
+Stop Directory
+When the stop button is clicked an image is saved in this directory
+</HelpStopDir>
+
+<HelpGenDir>
+Gen Directory
+When the save every gen option is selected, the images will be saved in this directory
+</HelpGenDir>
+
+<HelpLoopDir>
+When Multiple runs are selected the final image at the end of each run will be saved in this directory
+</HelpLoopDir>
+
+            
+
